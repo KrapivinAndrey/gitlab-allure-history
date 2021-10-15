@@ -9,6 +9,7 @@ RUN wget --no-check-certificate https://repo.maven.apache.org/maven2/io/qameta/a
 FROM python:3.7.9-alpine3.13 AS build-image
 
 COPY --from=download /allure /allure
+COPY generate-index.py /usr/
 
 RUN apk --no-cache add \
 		git \
