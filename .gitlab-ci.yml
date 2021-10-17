@@ -1,0 +1,18 @@
+stages:
+  - build
+build:
+  stage: build
+  image: docker:stable
+  before_script:
+    - docker login --username $DOCKER_REGISTRY_USERNAME --password $DOCKER_REGISTRY_PASSWORD $KONTUR_REGISTRY_URL
+  script:
+    - if [[ $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH ]]; then PACKAGE_TAG="latest"; elif [[ $CI_COMMIT_BRANCH == "develop" ]]; then PACKAGE_TAG="test"; else PACKAGE_TAG=$CI_COMMIT_REF_SLUG; fi
+    - export TAG=$KONTUR_REGISTRY_URL/library/gitlab-allure-history:$PACKAGE_TAG
+    - docker build --rm --no-cache --tag $TAG .
+    - docker pull $KONTUR_REGISTRY_URL/library/dive:latest
+    - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock dive:latest --ci $TAG --lowestEfficiency=0.8 --highestUserWastedPercent=0.45
+    - docker push $TAG
+  after_script:
+    - docker logout $KONTUR_REGISTRY_URL
+
+
