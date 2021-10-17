@@ -3,6 +3,7 @@ stages:
 build:
   stage: build
   image: docker:stable
+  tags: [r1c_docker]
   before_script:
     - docker login --username $DOCKER_REGISTRY_USERNAME --password $DOCKER_REGISTRY_PASSWORD $KONTUR_REGISTRY_URL
   script:
