@@ -1,7 +1,9 @@
 variables:
   DIVE: registry.kontur.host/library/dive:latest
+
 stages:
   - build
+
 build:
   stage: build
   image: docker:stable

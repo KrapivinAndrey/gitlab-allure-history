@@ -3,7 +3,10 @@ import sys
 
 INDEX_TEXT_START = """<!DOCTYPE html>
 <html>
-<head><title>Index of {folderPath}</title></head>
+<head>
+    <link href="https://avatars.githubusercontent.com/u/5879127?s=64&v=4" rel="icon" type="image/x-icon" />
+    <title>Index of {folderPath}</title>
+</head>
 <body>
     <h2>Index of {folderPath}</h2>
     <hr>
