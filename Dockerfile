@@ -9,11 +9,12 @@ RUN wget --no-check-certificate https://repo.maven.apache.org/maven2/io/qameta/a
 FROM python:3.7.9-alpine3.13 AS build-image
 
 COPY --from=download /allure /allure
-COPY generate-index.py /usr/
+COPY create-allure-public.py /usr/
 
 RUN apk --no-cache add \
 		git \
 		openjdk8-jre=8.275.01-r0 \
+	&& python3 -m pip install python-gitlab  \
     && rm -rf /var/cache/apk/*
 
 ENV PATH="/allure/bin:/app/venv/bin:${PATH}"
