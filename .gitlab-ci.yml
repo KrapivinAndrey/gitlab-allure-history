@@ -9,15 +9,15 @@ build:
   image: docker:stable
   tags: [r1c_docker]
   before_script:
-    - docker login --username $DOCKER_REGISTRY_USERNAME --password $DOCKER_REGISTRY_PASSWORD $KONTUR_REGISTRY_URL
+    - docker login --username $DOCKER_REGISTRY_USERNAME --password $DOCKER_REGISTRY_PASSWORD $DOCKER_REGISTRY
   script:
-    - export TAG=$KONTUR_REGISTRY_URL/library/gitlab-allure-history:test
+    - export TAG=$DOCKER_REGISTRY/library/gitlab-allure-history:test
     - docker build --rm --no-cache --tag $TAG .
     - docker pull $DIVE
     - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock $DIVE --ci $TAG --lowestEfficiency=0.8 --highestUserWastedPercent=0.45
     - docker push $TAG
   after_script:
-    - docker logout $KONTUR_REGISTRY_URL
+    - docker logout $DOCKER_REGISTRY
   only:
     - branches
   except:
@@ -28,13 +28,13 @@ release:
   image: docker:stable
   tags: [r1c_docker]
   before_script:
-    - docker login --username $DOCKER_REGISTRY_USERNAME --password $DOCKER_REGISTRY_PASSWORD $KONTUR_REGISTRY_URL
+    - docker login --username $DOCKER_REGISTRY_USERNAME --password $DOCKER_REGISTRY_PASSWORD $DOCKER_REGISTRY
   script:
-    - export TAG=$KONTUR_REGISTRY_URL/library/gitlab-allure-history:latest
+    - export TAG=$DOCKER_REGISTRY/library/gitlab-allure-history:latest
     - docker build --rm --no-cache --tag $TAG .
     - docker push $TAG
   after_script:
-    - docker logout $KONTUR_REGISTRY_URL
+    - docker logout $DOCKER_REGISTRY
   only:
     - master
 
