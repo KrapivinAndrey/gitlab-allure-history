@@ -96,7 +96,7 @@ def prepare_directory():
         print("No history")
 
     print("Create executor info")
-    with open(os.path.join(allure, "executor.json"), "w") as f:
+    with open(os.path.join(allure, "executor.json"), "w+") as f:
         pages_url = os.environ["CI_PAGES_URL"]
         f.write(
             '{"name":"GitLabCI","type":"gitlab","reportName":"Allure Report with history",\n'
