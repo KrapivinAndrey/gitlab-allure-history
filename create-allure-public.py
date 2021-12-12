@@ -90,8 +90,9 @@ def clear_old_branches():
 
 def prepare_directory():
     history = os.path.join(branch_dir, "history")
+    allure_history = os.path.join(allure, "history")
     if os.path.exists(history):
-        copy_tree(history, allure)
+        copy_tree(history, allure_history)
     else:
         print("No history")
 
