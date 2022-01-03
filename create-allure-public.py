@@ -1,8 +1,11 @@
-import gitlab
+import glob
 import os
 import shutil
-from distutils.dir_util import copy_tree
 import subprocess
+import time
+from distutils.dir_util import copy_tree
+
+import gitlab
 
 INDEX_TEXT_START = """<!DOCTYPE html>
 <html>
@@ -113,11 +116,21 @@ def prepare_directory():
         f.write("}")
 
 
+def clear_old_reports():
+    list_of_files = filter(os.path.isfile, glob.glob(branch_dir + "*"))
+    list_of_files = sorted(list_of_files, key=os.path.getmtime)
+
+    if len(list_of_files) < 10:
+        return
+    print("Clear old reports")
+    for report_dir in list_of_files[:-10]:
+        print(f"Remove {report_dir}")
+        shutil.rmtree(os.path.join(report_dir))
+
+
 def create_allure():
     print("Create Allure report")
-    subprocess.run(
-        ["allure", "generate", allure, "-o", report]
-    )
+    subprocess.run(["allure", "generate", allure, "-o", report])
 
 
 def copy_folders():
@@ -141,6 +154,7 @@ def create_indexes():
 def main():
     clear_old_branches()
     prepare_directory()
+    clear_old_reports()
     create_allure()
     copy_folders()
     create_indexes()
