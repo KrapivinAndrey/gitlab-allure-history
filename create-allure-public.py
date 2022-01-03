@@ -2,7 +2,6 @@ import glob
 import os
 import shutil
 import subprocess
-import time
 from distutils.dir_util import copy_tree
 
 import gitlab
@@ -117,7 +116,7 @@ def prepare_directory():
 
 
 def clear_old_reports():
-    list_of_files = filter(os.path.isfile, glob.glob(branch_dir + "*"))
+    list_of_files = filter(os.path.isdir, glob.glob(os.path.join(branch_dir, "pipeline*")))
     list_of_files = sorted(list_of_files, key=os.path.getmtime)
 
     if len(list_of_files) < 10:
