@@ -4,7 +4,7 @@ import shutil
 import subprocess
 from distutils.dir_util import copy_tree
 
-import gitlab
+from gitlab import Gitlab
 
 INDEX_TEXT_START = """<!DOCTYPE html>
 <html>
@@ -26,8 +26,9 @@ INDEX_TEXT_END = """
 </html>
 """
 
+# region helpers
 
-def translit(instr):
+def __translit(instr):
     symbols = (
         "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ",
         "abvgdeejzijklmnoprstufhzcss_y_euaABVGDEEJZIJKLMNOPRSTUFHZCSS_Y_EUA",
@@ -37,11 +38,11 @@ def translit(instr):
     return instr.translate(tr)
 
 
-def prepare_name(branch_name):
-    return translit(branch_name).replace("/", "_")
+def __prepare_name(branch_name):
+    return __translit(branch_name).replace("/", "_")
 
 
-def index_folder(path_):
+def __index_folder(path_):
     print("Indexing: " + path_ + "/")
     # Getting the content of the folder
     files = os.listdir(path_)
@@ -63,26 +64,65 @@ def index_folder(path_):
         index.write(index_text)
 
 
+def __findReplace(directory, find, extension="txt"):
+    length_to_replace = len(find) // 2
+    replace = find[:-length_to_replace] + "*" * length_to_replace
+    for_work = set()
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith(f".{extension}"):
+                filepath = os.path.join(root, file)
+                for_work.add(filepath)
+
+    for filepath in for_work:
+        with open(filepath, encoding="utf-8-sig") as file:
+            s = file.read()
+        if s.find(find):
+            print('nashel')
+        s = s.replace(find, replace)
+        with open(filepath, "w", encoding="utf-8-sig") as file:
+            file.write(s)
+
+
+def __get_all_secrets():
+    result = set()
+    id = os.environ.get("CI_PROJECT_ID")
+    project = gl.projects.get(id)
+
+    vl = project.variables.list()
+    for variable in vl:
+        result.add(variable.value)
+
+    for group in project.groups.list():
+        vl = gl.groups.get(group.id).variables.list()
+        for variable in vl:
+            result.add(variable.value)
+
+    return result
+
+# endregion
+
 public = os.path.abspath(f"./{os.environ['CI_PROJECT_NAME']}/public")
 allure = os.path.abspath(os.environ["ALLURE_REPORTS"])
 report = f"pipeline_{os.environ['CI_PIPELINE_ID']}"
-branch = prepare_name(os.environ["CI_COMMIT_REF_NAME"])
+branch = __prepare_name(os.environ["CI_COMMIT_REF_NAME"])
 branch_dir = os.path.join(public, branch)
+
+gl = Gitlab(
+        "https://" + os.environ["CI_SERVER_HOST"],
+        private_token=os.environ["JENKINS1C_GITLAB_API_TOKEN"],
+    )
+gl.auth()
 
 
 def clear_old_branches():
     print("Clear old branches")
-    gl = gitlab.Gitlab(
-        "https://" + os.environ["CI_SERVER_HOST"],
-        private_token=os.environ["JENKINS1C_GITLAB_API_TOKEN"],
-    )
-    gl.auth()
 
     project = gl.projects.get(os.environ["CI_PROJECT_ID"])
     print("Actual branches")
     for x in project.branches.list():
         print(f"> {x.name}")
-    branches = [prepare_name(x.name) for x in project.branches.list()]
+    branches = [__prepare_name(x.name) for x in project.branches.list()]
 
     for x in os.listdir(public):
         if x not in branches and os.path.isdir(os.path.join(public, x)):
@@ -127,6 +167,15 @@ def clear_old_reports():
         shutil.rmtree(os.path.join(report_dir))
 
 
+def clear_secrets():
+    print("Clear secrets")
+
+    for variables in __get_all_secrets():
+        __findReplace(allure, variables, "json")
+        __findReplace(allure, variables, "html")
+        __findReplace(allure, variables, "xml")
+
+
 def create_allure():
     print("Create Allure report")
     subprocess.run(["allure", "generate", allure, "-o", report])
@@ -146,18 +195,21 @@ def copy_folders():
 
 def create_indexes():
     print("Create index.html")
-    index_folder(public)
-    index_folder(branch_dir)
+    __index_folder(public)
+    __index_folder(branch_dir)
 
 
 def main():
     clear_old_branches()
     prepare_directory()
     clear_old_reports()
+
+    clear_secrets()
     create_allure()
+
     copy_folders()
     create_indexes()
 
 
 if __name__ == "__main__":
-    main()
+   main()
