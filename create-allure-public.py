@@ -78,10 +78,9 @@ def __findReplace(directory, find, extension="txt"):
         with open(filepath, encoding="utf-8-sig") as file:
             s = file.read()
         if s.find(find):
-            print('nashel')
-        s = s.replace(find, replace)
-        with open(filepath, "w", encoding="utf-8-sig") as file:
-            file.write(s)
+            s = s.replace(find, replace)
+            with open(filepath, "w", encoding="utf-8-sig") as file:
+                file.write(s)
 
 
 def __get_all_secrets():
