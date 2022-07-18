@@ -110,6 +110,7 @@ branch_dir = os.path.join(public, branch)
 gl = Gitlab(
         "https://" + os.environ["CI_SERVER_HOST"],
         private_token=os.environ["JENKINS1C_GITLAB_API_TOKEN"],
+        per_page=50
     )
 gl.auth()
 
