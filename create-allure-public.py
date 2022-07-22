@@ -120,9 +120,9 @@ def clear_old_branches():
     project = gl.projects.get(os.environ["CI_PROJECT_ID"])
     print("Actual branches")
     all_branches = project.branches.list(all=True)
-    for x in project.branches.list():
+    for x in all_branches:
         print(f"> {x.name}")
-    branches = [__prepare_name(x.name) for x in project.branches.list()]
+    branches = [__prepare_name(x.name) for x in all_branches]
 
     for x in os.listdir(public):
         if x not in branches and os.path.isdir(os.path.join(public, x)):
