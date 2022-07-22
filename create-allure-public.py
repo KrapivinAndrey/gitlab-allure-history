@@ -64,7 +64,7 @@ def __index_folder(path_):
         index.write(index_text)
 
 
-def __findReplace(directory, find, extension="txt"):
+def __find_n_replace(directory, find, extension="txt"):
     length_to_replace = len(find) // 2
     replace = find[:-length_to_replace] + "*" * length_to_replace
     for_work = set()
@@ -109,8 +109,7 @@ branch_dir = os.path.join(public, branch)
 
 gl = Gitlab(
         "https://" + os.environ["CI_SERVER_HOST"],
-        private_token=os.environ["JENKINS1C_GITLAB_API_TOKEN"],
-        per_page=50
+        private_token=os.environ["JENKINS1C_GITLAB_API_TOKEN"]
     )
 gl.auth()
 
@@ -120,6 +119,7 @@ def clear_old_branches():
 
     project = gl.projects.get(os.environ["CI_PROJECT_ID"])
     print("Actual branches")
+    all_branches = project.branches.list(all=True)
     for x in project.branches.list():
         print(f"> {x.name}")
     branches = [__prepare_name(x.name) for x in project.branches.list()]
@@ -171,9 +171,9 @@ def clear_secrets():
     print("Clear secrets")
 
     for variables in __get_all_secrets():
-        __findReplace(allure, variables, "json")
-        __findReplace(allure, variables, "html")
-        __findReplace(allure, variables, "xml")
+        __find_n_replace(allure, variables, "json")
+        __find_n_replace(allure, variables, "html")
+        __find_n_replace(allure, variables, "xml")
 
 
 def create_allure():

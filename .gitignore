@@ -2,3 +2,4 @@ Build/
 public/
 .idea
 venv
+.env
