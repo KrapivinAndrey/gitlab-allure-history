@@ -159,10 +159,12 @@ def clear_old_reports():
     list_of_files = filter(os.path.isdir, glob.glob(os.path.join(branch_dir, "pipeline*")))
     list_of_files = sorted(list_of_files, key=os.path.getmtime)
 
-    if len(list_of_files) < 10:
+    save_length = os.environ.get("LEN_ALLURE_HISTORY", 10)
+
+    if len(list_of_files) < save_length:
         return
     print("Clear old reports")
-    for report_dir in list_of_files[:-10]:
+    for report_dir in list_of_files[:-save_length]:
         print(f"Remove {report_dir}")
         shutil.rmtree(os.path.join(report_dir))
 
