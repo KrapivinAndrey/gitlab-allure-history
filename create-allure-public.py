@@ -159,7 +159,7 @@ def clear_old_reports():
     list_of_files = filter(os.path.isdir, glob.glob(os.path.join(branch_dir, "pipeline*")))
     list_of_files = sorted(list_of_files, key=os.path.getmtime)
 
-    save_length = os.environ.get("LEN_ALLURE_HISTORY", 10)
+    save_length = int(os.environ.get("LEN_ALLURE_HISTORY", 10))
 
     if len(list_of_files) < save_length:
         return
